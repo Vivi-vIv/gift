@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Особое лобби — для kuni.</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    background: radial-gradient(circle at 20% 20%, #16264d 0%, #0a1128 45%, #05070f 100%);
+    color: #e8eefc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #ffe9a7;
+    border-radius: 50%;
+    opacity: .7;
+    animation: twinkle 3s infinite ease-in-out;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: .15; transform: scale(.8); }
+    50% { opacity: .9; transform: scale(1.2); }
+  }
+
+  .screen {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 760px;
+    display: none;
+    animation: appear .6s ease;
+  }
+
+  .screen.active { display: block; }
+
+  @keyframes appear {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel {
+    background: rgba(9, 16, 38, .88);
+    border: 1px solid rgba(255, 206, 84, .35);
+    border-radius: 18px;
+    padding: 34px 28px;
+    text-align: center;
+    box-shadow: 0 0 45px rgba(64, 108, 255, .18), inset 0 0 25px rgba(255, 206, 84, .06);
+    backdrop-filter: blur(6px);
+  }
+
+  .logo {
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #ffd166;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(26px, 5vw, 42px);
+    color: #fff;
+    text-shadow: 0 0 18px rgba(255, 209, 102, .35);
+    margin-bottom: 14px;
+  }
+
+  p {
+    color: #c9d6f5;
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  .btn {
+    margin-top: 26px;
+    display: inline-block;
+    padding: 14px 34px;
+    border: 1px solid #ffd166;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255, 209, 102, .18), rgba(64, 108, 255, .18));
+    color: #ffe9a7;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: .25s;
+  }
+
+  .btn:hover {
+    background: linear-gradient(135deg, rgba(255, 209, 102, .3), rgba(64, 108, 255, .3));
+    box-shadow: 0 0 22px rgba(255, 209, 102, .35);
+    transform: translateY(-2px);
+  }
+
+  .players {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+  }
+
+  .player {
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(120, 160, 255, .25);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .player h2 {
+    color: #ffd166;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .hero {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 209, 102, .12);
+    border: 1px solid rgba(255, 209, 102, .35);
+    color: #ffe9a7;
+    font-size: 14px;
+  }
+
+  .old-nick {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #8ea3cc;
+  }
+
+  .items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 26px;
+  }
+
+  .item {
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(120, 160, 255, .25);
+    border-radius: 14px;
+    padding: 22px 16px;
+    cursor: pointer;
+    transition: .25s;
+  }
+
+  .item:hover {
+    border-color: #ffd166;
+    box-shadow: 0 0 18px rgba(255, 209, 102, .2);
+    transform: translateY(-3px);
+  }
+
+  .item-icon {
+    font-size: 30px;
+    margin-bottom: 10px;
+  }
+
+  .item h3 {
+    color: #ffd166;
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+
+  .memory {
+    display: none;
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 12px;
+    background: rgba(255, 209, 102, .08);
+    border: 1px solid rgba(255, 209, 102, .3);
+    color: #e8eefc;
+    text-align: left;
+  }
+
+  .memory.show { display: block; animation: appear .4s ease; }
+
+  .letter {
+    text-align: left;
+    white-space: pre-line;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 209, 102, .3);
+    border-radius: 14px;
+    padding: 24px;
+    margin-top: 22px;
+    line-height: 1.8;
+    color: #e8eefc;
+  }
+
+  .final {
+    font-size: clamp(20px, 4vw, 30px);
+    color: #ffd166;
+    text-shadow: 0 0 20px rgba(255, 209, 102, .4);
+  }
+
+  .hint {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #8ea3cc;
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- Экран 1: приглашение -->
+<section class="screen active" id="screen1">
+  <div class="panel">
+    <div class="logo">Land of Dawn</div>
+    <h1>Входящее приглашение</h1>
+    <p>
+      Игрок <b style="color:#ffd166">ℙEℂℂA₮Uᗰ</b> приглашает тебя<br>
+      в особое лобби.<br><br>
+      Это не обычная катка.<br>
+      Здесь можно остаться на пару минут.
+    </p>
+    <button class="btn" onclick="go(2)">Принять приглашение</button>
+  </div>
+</section>
+
+<!-- Экран 2: лобби -->
+<section class="screen" id="screen2">
+  <div class="panel">
+    <div class="logo">Команда</div>
+    <h1>Ваше лобби</h1>
+    <p>Некоторые напарники остаются в памяти даже после выхода из игры.</p>
+
+    <div class="players">
+      <div class="player">
+        <h2>ℙEℂℂA₮Uᗰ</h2>
+        <div class="hero">Кагура</div>
+        <div class="old-nick">Твой напарник</div>
+      </div>
+
+      <div class="player">
+        <h2>kuni.</h2>
+        <div class="hero">Баданг</div>
+        <div class="old-nick">Раньше был известен как Dasad.</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="go(3)">Открыть инвентарь</button>
+  </div>
+</section>
+
+<!-- Экран 3: воспоминания -->
+<section class="screen" id="screen3">
+  <div class="panel">
+    <div class="logo">Инвентарь воспоминаний</div>
+    <h1>Три вещи, которые остались</h1>
+    <p>Нажми на каждый предмет.</p>
+
+    <div class="items">
+      <div class="item" onclick="showMemory(1)">
+        <div class="item-icon">🛡️</div>
+        <h3>Защита</h3>
+        <p>За то, что были рядом.</p>
+        <div class="memory" id="memory1">
+          Спасибо за все моменты, когда ты просто был рядом — в игре и за её пределами.
+        </div>
+      </div>
+
+      <div class="item" onclick="showMemory(2)">
+        <div class="item-icon">⚔️</div>
+        <h3>Бой</h3>
+        <p>Наши катки и эмоции.</p>
+        <div class="memory" id="memory2">
+          Если мейны, то вся карта точно будет в страхе, в этом никогда не было сомнений.
+        </div>
+      </div>
+
+      <div class="item" onclick="showMemory(3)">
+        <div class="item-icon">✨</div>
+        <h3>Возрождение</h3>
+        <p>Пожелание на будущее.</p>
+        <div class="memory" id="memory3">
+          Пусть впереди будет много хороших матчей, лёгких побед и людей, с которыми играется так же легко, как когда-то со мной.
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="go(4)">Открыть сообщение от напарника</button>
+  </div>
+</section>
+
+<!-- Экран 4: письмо -->
+<section class="screen" id="screen4">
+  <div class="panel">
+    <div class="logo">Личное сообщение</div>
+    <h1>Для Dasad.</h1>
+
+    <div class="letter">
+        Да, ты сменил ник, но я знала того человека, поэтому и обращаюсь к нему.
+        Ты говорил, что для тебя такое не делали, поэтому это мой тебе прощальный подарок. Мне жаль, что все так закончилось, но возможно мы ради этого и встретились - чтобы показать друг другу другую картину мира. Я искренне благодарна за совместно ппроведенное врямя, надеюсь, у тебя все будет хорошо. Успехов с целью по достижению звезд :)
+    </div>
+
+    <button class="btn" onclick="go(5)">Сохранить воспоминание</button>
+  </div>
+</section>
+
+<!-- Экран 5: финал -->
+<section class="screen" id="screen5">
+  <div class="panel">
+    <div class="logo">Конец матча</div>
+    <h1 class="final">Лобби можно покинуть.<br>Воспоминание — остаётся.</h1>
+    <p>
+      Спасибо за то, что однажды мы оказались в одной команде.<br>
+      Пусть твоя следующая игра будет хорошей.
+    </p>
+    <button class="btn" onclick="restart()">Вернуться в начало</button>
+  </div>
+</section>
+
+<script>
+  const screens = document.querySelectorAll('.screen');
+
+  function go(n) {
+    screens.forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + n).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showMemory(n) {
+    const box = document.getElementById('memory' + n);
+    box.classList.toggle('show');
+  }
+
+  function restart() {
+    document.querySelectorAll('.memory').forEach(m => m.classList.remove('show'));
+    go(1);
+  }
+
+  const stars = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = Math.random() * 3 + 's';
+    stars.appendChild(s);
+  }
+</script>
+
+</body>
+</html>
